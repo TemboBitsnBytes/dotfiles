@@ -1,3 +1,6 @@
+# Contains extra functionality to my bashrc.
+# queried by .bashrc
+
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
@@ -21,4 +24,3 @@ alias camp='cd ~/Documents/camp'
 alias myfit='cd ~/Documents/school/but/sem_7'
 alias mytmux='tmux a'
 alias yu='cd ~/Documents/camp/endCore/python/yu'
-
