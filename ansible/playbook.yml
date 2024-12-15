@@ -1,7 +1,5 @@
 ---
 - hosts: localhost
   become: true
-  tasks:
-      - include_role:
-          name: dotfiles
-          
+  roles:
+    - dotfiles
