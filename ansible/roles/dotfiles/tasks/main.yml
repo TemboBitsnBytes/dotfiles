@@ -1,0 +1,70 @@
+---
+# 1, install needed packages
+- name: Install required packages
+  ansible.builtin.package:
+      name:
+          - tmux
+          - vim 
+          - neovim 
+          - curl 
+          - git 
+          - fonts-powerline 
+      state: present
+
+# 2. ensure ~/.config and ~./config/dotfiles exist
+- name: Ensure directory structure
+  ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0755'
+  loop:
+      - "~/.config"
+      - "~/.config/dotfiles"
+
+# 3. Append source logic to original .bashrc
+
+- name: Append sourcing logic to .bashrc
+  ansible.builtin.lineinfile:
+      path: "~/.bashrc"
+      line: 'if [ -f ~/.config/dotfiles/.bashrc_extension ]; then source ~/.config/dotfiles/.bashrc_extension; fi'
+      state: present 
+
+    
+# 4. Create sysmlinks #To do: add a checker and make backups of any pre-existing dot files
+- name: Symlink dotfiles to their respective locations 
+  ansible.builtin.file:
+      src: "{{ item.src }}"
+      dest: "{{ item.src }}"
+      state: link
+  loop: 
+    - { src: "~/.config/dotfiles/.bash_aliases", dest: "~/.bash_aliases" }
+    - { src:  "~/.config/dotfiles/.vimrc", dest: "~/.vimrc" }
+    - { src:  "~/.config/dotfiles/.tmux.conf", dest: "~/.tmux.conf" }
+
+# 5. Install vim-plug for vim 
+- name: Install vim-plug
+  ansible.builtin.command:
+      cmd: "curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+      creates: "~/.vim/autoload/plug.vim"
+
+# 6. Install vim plugins
+- name: Install vim plugins
+  ansible.builtin.command:
+      cmd: "vim +PlugInstall +qall"
+      args: 
+          creates: "~/.vim/plugged/vim-airline"
+          
+# 7. Clone Tmux Plugin Manager (TMP)
+- name: Clone Tmux Plugin Manager (TMP)
+  ansible.builtin.git:
+      repo: https://github.com/tmux-plugins/tpm
+      dest: "~/.tmux/plugins/tpm"
+      version: main 
+
+
+# 8. Install Tmux plugins using TMP
+- name: Install Tmux plugins using TPM
+  ansible.builtin.command:
+      cmd: "~/.tmux/plugins/tpm/bin/install_plugins"
+      args:
+          creates: "~/.tmux/plugins/tmux-resurrect"
